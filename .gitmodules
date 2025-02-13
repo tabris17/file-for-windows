@@ -1,0 +1,6 @@
+[submodule "file"]
+	path = file
+	url = https://github.com/file/file
+[submodule "pcre2"]
+	path = pcre2
+	url = https://github.com/PCRE2Project/pcre2

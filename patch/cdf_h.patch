@@ -1,0 +1,17 @@
+diff --git a/src/cdf.h b/src/cdf.h
+index 4a4c3555..45978bc0 100644
+--- a/src/cdf.h
++++ b/src/cdf.h
+@@ -36,9 +36,9 @@
+ #define _H_CDF_
+ 
+ #ifdef WIN32
+-#include <winsock2.h>
+-#define timespec timeval
+-#define tv_nsec tv_usec
++//#include <winsock2.h>
++//#define timespec timeval
++//#define tv_nsec tv_usec
+ #endif
+ #ifdef __DJGPP__
+ #define timespec timeval

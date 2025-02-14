@@ -1,6 +1,12 @@
 [submodule "file"]
 	path = file
 	url = https://github.com/file/file
+	branch = master
 [submodule "pcre2"]
 	path = pcre2
 	url = https://github.com/PCRE2Project/pcre2
+	branch = release/pcre2-10.45
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib
+	branch = master

@@ -1,6 +1,6 @@
 .ninja_*
 build.ninja
-cmake_install.cmake
+*.cmake
 CMakeCache.txt
 CMakeFiles/
 out/

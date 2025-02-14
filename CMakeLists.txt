@@ -47,19 +47,27 @@ set(LIBMAGIC_SOURCE_FILES
   file/src/vasprintf.c
   include/magic.def
 )
-set(LIBMAGIC_LIBS pcre2-posix shlwapi)
+set(LIBMAGIC_LIBS pcre2-posix zlibstatic shlwapi)
+set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/zlib")
+set(ZLIB_INCLUDE_DIR "${ZLIB_LIBRARY}")
 
 #if(CMAKE_COMPILER_IS_GNUCC)
 #endif(CMAKE_COMPILER_IS_GNUCC)
 
 add_definitions(-DHAVE_CONFIG_H -DVERSION="${FILE_VERSION}" -DPCRE2_STATIC)
-include_directories("${CMAKE_SOURCE_DIR}/include" pcre2/src file/src)
+include_directories("${CMAKE_SOURCE_DIR}/include" pcre2/src file/src zlib)
+
+set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "Build zlib examples" FORCE)
+add_subdirectory(zlib)
+
+set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "Build pcre2grep" FORCE)
+set(PCRE2_BUILD_TESTS OFF CACHE BOOL "Build pcre2grep tests" FORCE)
 add_subdirectory(pcre2)
 
 add_library(magicstatic STATIC ${LIBMAGIC_SOURCE_FILES})
 target_include_directories(magicstatic PRIVATE "${CMAKE_SOURCE_DIR}")
 target_compile_definitions(magicstatic PRIVATE -DMAGIC_RESOURCE)
-target_include_directories(magicstatic PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" pcre2/src file/src)
+target_include_directories(magicstatic PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" pcre2/src file/src zlib)
 target_compile_definitions(magicstatic PUBLIC -DHAVE_CONFIG_H -DVERSION="${FILE_VERSION}")
 
 add_library(magic SHARED ${LIBMAGIC_SOURCE_FILES})

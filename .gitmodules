@@ -10,3 +10,11 @@
 	path = zlib
 	url = https://github.com/madler/zlib
 	branch = master
+[submodule "bzip2"]
+	path = bzip2
+	url = git://sourceware.org/git/bzip2.git
+	branch = master
+[submodule "xz"]
+	path = xz
+	url = https://git.tukaani.org/xz.git
+	branch = v5.6

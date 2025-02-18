@@ -6,9 +6,9 @@ file(READ "${CMAKE_SOURCE_DIR}/VERSION" FILE_VERSION)
 
 set(PATCH_DIR "${CMAKE_SOURCE_DIR}/patch")
 set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/out")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 set(LIBMAGIC_SOURCE_FILES
   file/src/apprentice.c
   file/src/apptype.c
@@ -47,38 +47,54 @@ set(LIBMAGIC_SOURCE_FILES
   file/src/vasprintf.c
   include/magic.def
 )
-set(LIBMAGIC_LIBS pcre2-posix zlibstatic shlwapi)
-set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/zlib")
-set(ZLIB_INCLUDE_DIR "${ZLIB_LIBRARY}")
+set(BZIP2_SOURCE_FILES
+  bzip2/blocksort.c
+  bzip2/bzlib.c
+  bzip2/compress.c
+  bzip2/crctable.c
+  bzip2/decompress.c
+  bzip2/huffman.c
+  bzip2/randtable.c
+)
+set(LIBMAGIC_LIBS shlwapi pcre2-posix zlibstatic bzip2 liblzma)
+set(LIBMAGIC_DEFINITIONS -DHAVE_CONFIG_H -DVERSION="${FILE_VERSION}")
 
-#if(CMAKE_COMPILER_IS_GNUCC)
-#endif(CMAKE_COMPILER_IS_GNUCC)
+# Replace the version in the magic.h.in and write it to magic.h
+file(READ file/src/magic.h.in MAGIC_H_CONTENT)
+string(REPLACE "." "" FILE_VERSION_WITHOUT_DOT "${FILE_VERSION}")
+string(REPLACE "X.YY" ${FILE_VERSION_WITHOUT_DOT} MAGIC_H_CONTENT_NEW "${MAGIC_H_CONTENT}")
+file(WRITE file/src/magic.h "${MAGIC_H_CONTENT_NEW}")
 
-add_definitions(-DHAVE_CONFIG_H -DVERSION="${FILE_VERSION}" -DPCRE2_STATIC)
-include_directories("${CMAKE_SOURCE_DIR}/include" pcre2/src file/src zlib)
+add_definitions(-DPCRE2_STATIC -DLZMA_API_STATIC)
+include_directories("${CMAKE_SOURCE_DIR}/include" pcre2/src file/src zlib "${CMAKE_BINARY_DIR}/zlib" bzip2 "${CMAKE_BINARY_DIR}/pcre2" xz/src/liblzma/api)
+
+add_library(bzip2 STATIC ${BZIP2_SOURCE_FILES})
+target_include_directories(bzip2 PRIVATE bzip2)
 
 set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "Build zlib examples" FORCE)
 add_subdirectory(zlib)
+
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(xz)
 
 set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "Build pcre2grep" FORCE)
 set(PCRE2_BUILD_TESTS OFF CACHE BOOL "Build pcre2grep tests" FORCE)
 add_subdirectory(pcre2)
 
 add_library(magicstatic STATIC ${LIBMAGIC_SOURCE_FILES})
-target_include_directories(magicstatic PRIVATE "${CMAKE_SOURCE_DIR}")
-target_compile_definitions(magicstatic PRIVATE -DMAGIC_RESOURCE)
-target_include_directories(magicstatic PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" pcre2/src file/src zlib)
-target_compile_definitions(magicstatic PUBLIC -DHAVE_CONFIG_H -DVERSION="${FILE_VERSION}")
+target_compile_definitions(magicstatic PUBLIC ${LIBMAGIC_DEFINITIONS})
 
 add_library(magic SHARED ${LIBMAGIC_SOURCE_FILES})
 target_link_libraries(magic ${LIBMAGIC_LIBS})
+target_compile_definitions(magic PUBLIC ${LIBMAGIC_DEFINITIONS})
 
 add_executable(file file/src/file.c)
-target_include_directories(file PRIVATE "${CMAKE_SOURCE_DIR}")
+target_include_directories(file PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(file magicstatic ${LIBMAGIC_LIBS})
+target_compile_definitions(file PUBLIC ${LIBMAGIC_DEFINITIONS})
 
-if(NOT EXISTS "${OUTPUT_DIR}")
-  file(MAKE_DIRECTORY "${OUTPUT_DIR}")  
+if(NOT EXISTS ${OUTPUT_DIR})
+  file(MAKE_DIRECTORY ${OUTPUT_DIR})  
 endif()
 
 set(MAGIC_DIR file/magic/Magdir)
@@ -86,7 +102,7 @@ file(GLOB MAGIC_FRAGMENTS "${MAGIC_DIR}/*")
 file(WRITE "${OUTPUT_DIR}/magic" "")
 
 foreach(MAGIC_FRAGMENT ${MAGIC_FRAGMENTS})
-  file(READ "${MAGIC_FRAGMENT}" MAGIC_FRAGMENT_CONTENTS)
+  file(READ ${MAGIC_FRAGMENT} MAGIC_FRAGMENT_CONTENTS)
   file(APPEND "${OUTPUT_DIR}/magic" "${MAGIC_FRAGMENT_CONTENTS}\n")
 endforeach()
 

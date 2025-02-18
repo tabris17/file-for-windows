@@ -235,6 +235,21 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #define HAVE_ZLIB_H 1
 
+/* Define to 1 if enable zlib support. */
+#define ZLIBSUPPORT 1
+
+/* Define to 1 if you have the <bzlib.h> header file. */
+#define HAVE_BZLIB_H 1
+
+/* Define to 1 if enable bzip2 support. */
+#define BZLIBSUPPORT 1
+
+/* Define to 1 if you have the <lzma.h> header file. */
+#define HAVE_LZMA_H 1
+
+/* Define to 1 if enable lzma support. */
+#define XZLIBSUPPORT 1
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR

@@ -1,6 +1,6 @@
-.ninja_*
-build.ninja
-*.cmake
-CMakeCache.txt
-CMakeFiles/
+.vscode/
+.idea/
+.vs/
+
+build/
 out/

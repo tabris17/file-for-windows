@@ -56,7 +56,7 @@ set(BZIP2_SOURCE_FILES
   bzip2/huffman.c
   bzip2/randtable.c
 )
-set(DEPENDENT_LIBS pcre2-posix zlibstatic bzip2 liblzma libzstd_static)
+set(DEPENDENT_LIBS pcre2-posix zlibstatic bzip2 liblzma libzstd_static lzlib)
 set(LIBMAGIC_LIBS shlwapi ${DEPENDENT_LIBS})
 set(LIBMAGIC_DEFINITIONS -DHAVE_CONFIG_H -DVERSION="${FILE_VERSION}")
 
@@ -66,10 +66,24 @@ string(REPLACE "." "" FILE_VERSION_WITHOUT_DOT "${FILE_VERSION}")
 string(REPLACE "X.YY" ${FILE_VERSION_WITHOUT_DOT} MAGIC_H_CONTENT_NEW "${MAGIC_H_CONTENT}")
 file(WRITE file/src/magic.h "${MAGIC_H_CONTENT_NEW}")
 
-include_directories("${CMAKE_SOURCE_DIR}/include" pcre2/src file/src zlib "${CMAKE_BINARY_DIR}/zlib" bzip2 "${CMAKE_BINARY_DIR}/pcre2" xz/src/liblzma/api zstd/lib)
+include_directories(
+  "${CMAKE_SOURCE_DIR}/include"
+  file/src
+  pcre2/src
+  "${CMAKE_BINARY_DIR}/pcre2"
+  zlib
+  "${CMAKE_BINARY_DIR}/zlib"
+  bzip2
+  xz/src/liblzma/api
+  zstd/lib
+  lzlib
+)
 
 add_library(bzip2 STATIC ${BZIP2_SOURCE_FILES})
 target_include_directories(bzip2 PRIVATE bzip2)
+
+add_library(lzlib STATIC lzlib/lzlib.c)
+target_include_directories(lzlib PRIVATE lzlib)
 
 add_subdirectory(zlib EXCLUDE_FROM_ALL)
 add_subdirectory(xz EXCLUDE_FROM_ALL)

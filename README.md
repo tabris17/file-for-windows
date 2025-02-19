@@ -7,6 +7,8 @@ Dependent projects:
 - zlib: <https://github.com/madler/zlib>
 - bzip2: <https://sourceware.org/bzip2/>
 - liblzma: <https://tukaani.org/xz/>
+- zstd: <https://github.com/facebook/zstd>
+- lzlib: <https://www.nongnu.org/lzip/lzlib.html>
 
 Requirements:
 

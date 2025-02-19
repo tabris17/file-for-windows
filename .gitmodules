@@ -22,3 +22,7 @@
 	path = zstd
 	url = https://github.com/facebook/zstd
 	branch = release
+[submodule "lzlib"]
+	path = lzlib
+	url = https://github.com/tabris17/lzlib
+	branch = release/v1.15

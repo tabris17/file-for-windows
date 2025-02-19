@@ -102,7 +102,7 @@
 #undef HAVE_LRZIP_H
 
 /* Define to 1 if you have the <lzlib.h> header file. */
-#undef HAVE_LZLIB_H
+#define HAVE_LZLIB_H 1
 
 /* Define to 1 if you have the <lzma.h> header file. */
 #define HAVE_LZMA_H 1
@@ -281,7 +281,7 @@
 #undef LRZIPLIBSUPPORT
 
 /* Enable lzlib compression support */
-#undef LZLIBSUPPORT
+#define LZLIBSUPPORT 1
 
 /* Define to 1 if `major', `minor', and `makedev' are declared in <mkdev.h>.
    */

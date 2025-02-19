@@ -1,0 +1,226 @@
+diff --git a/src/compress.c b/src/compress.c
+index 7144fe7b..f6ab6b3f 100644
+--- a/src/compress.c
++++ b/src/compress.c
+@@ -225,9 +225,9 @@ file_private const struct {
+ #define NODATA	1
+ #define ERRDATA	2
+ 
+ file_private ssize_t swrite(int, const void *, size_t);
+-#if HAVE_FORK
++//#if HAVE_FORK
+ file_private size_t ncompr = __arraycount(compr);
+ file_private int uncompressbuf(int, size_t, size_t, int, const unsigned char *,
+     unsigned char **, size_t *);
+ #ifdef BUILTIN_DECOMPRESS
+@@ -291,9 +291,9 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
+ 	int fd = b->fd;
+ 	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
+ 	size_t nbytes = b->flen;
+ 	int sa_saved = 0;
+-	struct sigaction sig_act;
++	//struct sigaction sig_act;
+ 
+ 	if ((ms->flags & MAGIC_COMPRESS) == 0)
+ 		return 0;
+ 
+@@ -311,15 +311,15 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
+ 		if (!zm)
+ 			continue;
+ 
+ 		/* Prevent SIGPIPE death if child dies unexpectedly */
+-		if (!sa_saved) {
++		/*if (!sa_saved) {
+ 			//We can use sig_act for both new and old, but
+ 			struct sigaction new_act;
+ 			memset(&new_act, 0, sizeof(new_act));
+ 			new_act.sa_handler = SIG_IGN;
+ 			sa_saved = sigaction(SIGPIPE, &new_act, &sig_act) != -1;
+-		}
++		}*/
+ 
+ 		nsz = nbytes;
+ 		free(newbuf);
+ 		urv = uncompressbuf(fd, ms->bytes_max, i, 
+@@ -369,9 +369,9 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
+ 			/*FALLTHROUGH*/
+ 		case NODATA:
+ 			break;
+ 		default:
+-			abort();
++			//abort();
+ 			/*NOTREACHED*/
+ 		error:
+ 			rv = -1;
+ 			break;
+@@ -379,17 +379,17 @@ file_zmagic(struct magic_set *ms, const struct buffer *b, const char *name)
+ 	}
+ out:
+ 	DPRINTF("rv = %d\n", rv);
+ 
+-	if (sa_saved && sig_act.sa_handler != SIG_IGN)
+-		(void)sigaction(SIGPIPE, &sig_act, NULL);
++	/*if (sa_saved && sig_act.sa_handler != SIG_IGN)
++		(void)sigaction(SIGPIPE, &sig_act, NULL);*/
+ 
+ 	free(newbuf);
+ 	ms->flags |= MAGIC_COMPRESS;
+ 	DPRINTF("Zmagic returns %d\n", rv);
+ 	return rv;
+ }
+-#endif
++//#endif
+ /*
+  * `safe' write for sockets and pipes.
+  */
+ file_private ssize_t
+@@ -564,9 +564,9 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
+ 		return -1;
+ 	}
+ 	return fd;
+ }
+-#if HAVE_FORK
++//#if HAVE_FORK
+ #ifdef BUILTIN_DECOMPRESS
+ 
+ #define FHCRC		(1 << 1)
+ #define FEXTRA		(1 << 2)
+@@ -918,9 +918,9 @@ makeerror(unsigned char **buf, size_t *len, const char *fmt, ...)
+ 	*buf = RCAST(unsigned char *, msg);
+ 	*len = strlen(msg);
+ 	return ERRDATA;
+ }
+-
++#ifdef HAVE_FORK
+ static void
+ closefd(int *fd, size_t i)
+ {
+ 	if (fd[i] == -1)
+@@ -1046,9 +1046,9 @@ filter_error(unsigned char *ubuf, ssize_t n)
+ 	if (islower(*ubuf))
+ 		*ubuf = toupper(*ubuf);
+ 	return n;
+ }
+-
++#endif
+ file_private const char *
+ methodname(size_t method)
+ {
+ 	switch (method) {
+@@ -1125,10 +1125,12 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, int nofork,
+     const unsigned char *old, unsigned char **newch, size_t* n)
+ {
+ 	int fdp[3][2];
+ 	int status, rv, w;
++	#ifdef HAVE_FORK
+ 	pid_t pid;
+ 	pid_t writepid = -1;
++	#endif
+ 	size_t i;
+ 	ssize_t r, re;
+ 	char *const *args;
+ #ifdef HAVE_POSIX_SPAWNP
+@@ -1147,9 +1149,9 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, int nofork,
+ 			    "Fork is required to uncompress, but disabled");
+ 		}
+ 		return (*decompress)(old, newch, bytes_max, n, 1);
+ 	}
+-
++	#ifdef HAVE_FORK
+ 	(void)fflush(stdout);
+ 	(void)fflush(stderr);
+ 
+ 	for (i = 0; i < __arraycount(fdp); i++)
+@@ -1297,6 +1299,9 @@ wait_err:
+ 	closefd(fdp[STDIN_FILENO], 0); //why? it is already closed here!
+ 	DPRINTF("Returning %p n=%" SIZE_T_FORMAT "u rv=%d\n", *newch, *n, rv);
+ 
+ 	return rv;
++	#else
++	return -1;
++	#endif
+ }
+-#endif
++//#endif
+diff --git a/src/file.h b/src/file.h
+index 4f23c9d7..101b3bb1 100644
+--- a/src/file.h
++++ b/src/file.h
+@@ -564,12 +564,12 @@ file_protected int file_printf(struct magic_set *, const char *, ...)
+     __attribute__((__format__(__printf__, 2, 3)));
+ file_protected int file_reset(struct magic_set *, int);
+ file_protected int file_tryelf(struct magic_set *, const struct buffer *);
+ file_protected int file_trycdf(struct magic_set *, const struct buffer *);
+-#if HAVE_FORK
++//#if HAVE_FORK
+ file_protected int file_zmagic(struct magic_set *, const struct buffer *,
+     const char *);
+-#endif
++//#endif
+ file_protected int file_ascmagic(struct magic_set *, const struct buffer *,
+     int);
+ file_protected int file_ascmagic_with_encoding(struct magic_set *,
+     const struct buffer *, file_unichar_t *, size_t, const char *, const char *, int);
+diff --git a/src/funcs.c b/src/funcs.c
+index 2c8ab0c7..1f4803cf 100644
+--- a/src/funcs.c
++++ b/src/funcs.c
+@@ -362,19 +362,19 @@ file_buffer(struct magic_set *ms, int fd, struct stat *st,
+ 			return 1;
+ 		}
+ 	}
+ #endif
+-#if HAVE_FORK
++//#if HAVE_FORK
+ 	/* try compression stuff */
+ 	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
+ 		m = file_zmagic(ms, &b, inname);
+ 		if ((ms->flags & MAGIC_DEBUG) != 0)
+ 			(void)fprintf(stderr, "[try zmagic %d]\n", m);
+-		if (m) {
++		if (m && m != -1) {
+ 			goto done_encoding;
+ 		}
+ 	}
+-#endif
++//#endif
+ 	/* Check if we have a tar file */
+ 	if ((ms->flags & MAGIC_NO_CHECK_TAR) == 0) {
+ 		m = file_is_tar(ms, &b);
+ 		if ((ms->flags & MAGIC_DEBUG) != 0)
+@@ -498,11 +498,11 @@ simple:
+ 				rv = -1;
+ 		if (file_printf(ms, "%s", code_mime) == -1)
+ 			rv = -1;
+ 	}
+-#if HAVE_FORK
++//#if HAVE_FORK
+  done_encoding:
+-#endif
++//#endif
+ 	free(rbuf);
+ 	buffer_fini(&b);
+ 	if (rv)
+ 		return rv;
+@@ -947,9 +947,9 @@ file_print_guid(char *str, size_t len, const uint64_t *guid)
+ 	    g->data4[2], g->data4[3], g->data4[4], g->data4[5],
+ 	    g->data4[6], g->data4[7]);
+ #endif
+ }
+-
++#ifdef HAVE_FORK
+ file_protected int
+ file_pipe_closexec(int *fds)
+ {
+ #ifdef __MINGW32__
+@@ -965,9 +965,9 @@ file_pipe_closexec(int *fds)
+ # endif
+ 	return 0;
+ #endif
+ }
+-
++#endif
+ file_protected int
+ file_clear_closexec(int fd) {
+ #ifdef F_SETFD
+ 	return fcntl(fd, F_SETFD, 0);

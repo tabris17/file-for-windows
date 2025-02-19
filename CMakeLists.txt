@@ -118,4 +118,5 @@ add_custom_target(magic_file ALL DEPENDS "${OUTPUT_DIR}/magic.mgc")
 execute_process(
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/file"
   COMMAND git apply "${PATCH_DIR}/cdf_h.patch"
+  COMMAND git apply "${PATCH_DIR}/compress_support.patch"
 )

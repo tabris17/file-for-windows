@@ -4,9 +4,9 @@ Dependent projects:
 
 - file: <https://github.com/file/file>
 - pcre2: <https://github.com/PCRE2Project/pcre2>
-- zlib *: <https://github.com/madler/zlib>
-- bzip2 *: <https://sourceware.org/bzip2/>
-- liblzma *: <https://tukaani.org/xz/>
+- zlib: <https://github.com/madler/zlib>
+- bzip2: <https://sourceware.org/bzip2/>
+- liblzma: <https://tukaani.org/xz/>
 
 Requirements:
 
@@ -30,5 +30,3 @@ or
 cmake -D CMAKE_C_COMPILER=$( (Get-Command gcc).Source ) -D CMAKE_CXX_COMPILER=$( (Get-Command g++).Source ) -GNinja -Bbuild -S.
 cmake --build build --config Release --target magic magic_file file
 ```
-
-(\*) **Note**: `fork()` is required to fully support the -z/-Z arguments.

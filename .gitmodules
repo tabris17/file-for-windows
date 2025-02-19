@@ -18,3 +18,7 @@
 	path = xz
 	url = https://git.tukaani.org/xz.git
 	branch = v5.6
+[submodule "zstd"]
+	path = zstd
+	url = https://github.com/facebook/zstd
+	branch = release

@@ -275,7 +275,7 @@
 #undef HAVE_ZSTD_ERRORS_H
 
 /* Define to 1 if you have the <zstd.h> header file. */
-#undef HAVE_ZSTD_H
+#define HAVE_ZSTD_H 1
 
 /* Enable lrziplib compression support */
 #undef LRZIPLIBSUPPORT
@@ -424,7 +424,7 @@
 #define ZLIBSUPPORT 1
 
 /* Enable zstdlib compression support */
-#undef ZSTDLIBSUPPORT
+#define ZSTDLIBSUPPORT 1
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS

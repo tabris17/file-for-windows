@@ -56,7 +56,8 @@ set(BZIP2_SOURCE_FILES
   bzip2/huffman.c
   bzip2/randtable.c
 )
-set(LIBMAGIC_LIBS shlwapi pcre2-posix zlibstatic bzip2 liblzma)
+set(DEPENDENT_LIBS pcre2-posix zlibstatic bzip2 liblzma)
+set(LIBMAGIC_LIBS shlwapi ${DEPENDENT_LIBS})
 set(LIBMAGIC_DEFINITIONS -DHAVE_CONFIG_H -DVERSION="${FILE_VERSION}")
 
 # Replace the version in the magic.h.in and write it to magic.h
@@ -65,21 +66,14 @@ string(REPLACE "." "" FILE_VERSION_WITHOUT_DOT "${FILE_VERSION}")
 string(REPLACE "X.YY" ${FILE_VERSION_WITHOUT_DOT} MAGIC_H_CONTENT_NEW "${MAGIC_H_CONTENT}")
 file(WRITE file/src/magic.h "${MAGIC_H_CONTENT_NEW}")
 
-add_definitions(-DPCRE2_STATIC -DLZMA_API_STATIC)
 include_directories("${CMAKE_SOURCE_DIR}/include" pcre2/src file/src zlib "${CMAKE_BINARY_DIR}/zlib" bzip2 "${CMAKE_BINARY_DIR}/pcre2" xz/src/liblzma/api)
 
 add_library(bzip2 STATIC ${BZIP2_SOURCE_FILES})
 target_include_directories(bzip2 PRIVATE bzip2)
 
-set(ZLIB_BUILD_EXAMPLES OFF CACHE BOOL "Build zlib examples" FORCE)
-add_subdirectory(zlib)
-
-set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(xz)
-
-set(PCRE2_BUILD_PCRE2GREP OFF CACHE BOOL "Build pcre2grep" FORCE)
-set(PCRE2_BUILD_TESTS OFF CACHE BOOL "Build pcre2grep tests" FORCE)
-add_subdirectory(pcre2)
+add_subdirectory(zlib EXCLUDE_FROM_ALL)
+add_subdirectory(xz EXCLUDE_FROM_ALL)
+add_subdirectory(pcre2 EXCLUDE_FROM_ALL)
 
 add_library(magicstatic STATIC ${LIBMAGIC_SOURCE_FILES})
 target_compile_definitions(magicstatic PUBLIC ${LIBMAGIC_DEFINITIONS})
@@ -89,6 +83,7 @@ target_link_libraries(magic ${LIBMAGIC_LIBS})
 target_compile_definitions(magic PUBLIC ${LIBMAGIC_DEFINITIONS})
 
 add_executable(file file/src/file.c)
+add_dependencies(file magicstatic ${DEPENDENT_LIBS})
 target_include_directories(file PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(file magicstatic ${LIBMAGIC_LIBS})
 target_compile_definitions(file PUBLIC ${LIBMAGIC_DEFINITIONS})
